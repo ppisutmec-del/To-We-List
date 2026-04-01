@@ -36,7 +36,7 @@
 
         html,
         body {
-            height: 100%;
+            min-height: 100vh;
             background: var(--bg);
             color: var(--text);
             font-family: 'Noto Sans Thai', sans-serif
@@ -44,7 +44,7 @@
 
         body {
             overflow-x: hidden;
-            padding-bottom: 110px
+            padding-bottom: 200px
         }
 
         /* ─── Layout ─── */
@@ -206,7 +206,8 @@
             justify-content: center;
             font-size: 18px;
             margin: 0 auto 6px;
-            overflow: hidden; /* For circular images */
+            overflow: hidden;
+            /* For circular images */
         }
 
         .av1 {
@@ -743,7 +744,9 @@
         /* ─── Bottom Nav ─── */
         .bottom-nav {
             position: fixed;
-            bottom: 0; left: 0; right: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
             height: 60px;
             background: rgba(255, 251, 253, .95);
             backdrop-filter: blur(10px);
@@ -913,14 +916,16 @@
         <div class="owners-bar">
             <div class="owner-card active-p1" id="ownerP1" onclick="switchOwner('G')">
                 <div class="owner-avatar av1">
-                    <img src="g.png" style="width:100%; height:100%; object-fit:cover;" alt="G" onerror="this.style.display='none'">
+                    <img src="g.png" style="width:100%; height:100%; object-fit:cover;" alt="G"
+                        onerror="this.style.display='none'">
                 </div>
                 <div class="owner-name">G</div>
                 <div class="owner-count" id="count1">0 งาน</div>
             </div>
             <div class="owner-card" id="ownerP2" onclick="switchOwner('B')">
                 <div class="owner-avatar av2">
-                    <img src="b.png" style="width:100%; height:100%; object-fit:cover;" alt="B" onerror="this.style.display='none'">
+                    <img src="b.png" style="width:100%; height:100%; object-fit:cover;" alt="B"
+                        onerror="this.style.display='none'">
                 </div>
                 <div class="owner-name">B</div>
                 <div class="owner-count" id="count2">0 งาน</div>
@@ -997,10 +1002,16 @@
                 <button class="cal-btn" onclick="nextMonth()">❯</button>
             </div>
             <div class="cal-weekdays">
-                <div>อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div>
+                <div>อา</div>
+                <div>จ</div>
+                <div>อ</div>
+                <div>พ</div>
+                <div>พฤ</div>
+                <div>ศ</div>
+                <div>ส</div>
             </div>
             <div class="cal-grid" id="calGrid"></div>
-            
+
             <div class="cal-tasks-title" id="calTasksTitle" style="display:none;"></div>
             <div class="task-list" id="calTaskList"></div>
         </div>
@@ -1039,7 +1050,7 @@
         let currentOwnerFilter = 'G';
         let expandedId = null;
         let saveTimer = null;
-        
+
         let currentView = 'list';
         let calDate = new Date();
         let selectedCalDate = null;
@@ -1107,8 +1118,8 @@
         function switchView(view, btnNode) {
             currentView = view;
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            if(btnNode) btnNode.classList.add('active');
-            
+            if (btnNode) btnNode.classList.add('active');
+
             if (view === 'list') {
                 document.getElementById('listView').style.display = 'block';
                 document.getElementById('calendarView').style.display = 'none';
@@ -1121,18 +1132,18 @@
 
         function getTaskDateStr(t) {
             const dtStr = t.dueTime || t.created;
-            if(!dtStr) return null;
+            if (!dtStr) return null;
             const d = new Date(dtStr);
-            if(isNaN(d.getTime())) return null;
-            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            if (isNaN(d.getTime())) return null;
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
         function renderCalendar() {
             const year = calDate.getFullYear();
             const month = calDate.getMonth();
             const today = new Date();
-            
-            const monthNames = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+            const monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
             document.getElementById('calMonthLabel').textContent = `${monthNames[month]} ${year}`;
 
             const firstDay = new Date(year, month, 1).getDay();
@@ -1142,8 +1153,8 @@
             const dateMap = {};
             visibleTasks.forEach(t => {
                 const dateStr = getTaskDateStr(t);
-                if(dateStr) {
-                    if(!dateMap[dateStr]) dateMap[dateStr] = [];
+                if (dateStr) {
+                    if (!dateMap[dateStr]) dateMap[dateStr] = [];
                     dateMap[dateStr].push(t);
                 }
             });
@@ -1154,24 +1165,24 @@
             }
 
             for (let i = 1; i <= daysInMonth; i++) {
-                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
                 let classes = 'cal-cell';
-                if(year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) classes += ' today';
-                if(dateStr === selectedCalDate) classes += ' selected';
+                if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) classes += ' today';
+                if (dateStr === selectedCalDate) classes += ' selected';
 
                 let dotsHtml = '';
-                if(dateMap[dateStr] && dateMap[dateStr].length > 0) {
+                if (dateMap[dateStr] && dateMap[dateStr].length > 0) {
                     const dayTasks = dateMap[dateStr];
                     const numDots = Math.min(dayTasks.length, 3);
-                    for(let k=0; k<numDots; k++) {
+                    for (let k = 0; k < numDots; k++) {
                         let color = '#7a7a7a';
-                        if(dayTasks[k].priority === 'สูง') color = '#c62828';
-                        else if(dayTasks[k].priority === 'กลาง') color = '#f9a825';
-                        else if(dayTasks[k].priority === 'ต่ำ') color = '#558b2f';
+                        if (dayTasks[k].priority === 'สูง') color = '#c62828';
+                        else if (dayTasks[k].priority === 'กลาง') color = '#f9a825';
+                        else if (dayTasks[k].priority === 'ต่ำ') color = '#558b2f';
                         dotsHtml += `<div class="cal-dot" style="background:${color}"></div>`;
                     }
-                    if(dayTasks.length > 3) dotsHtml += `<div style="font-size:8px; line-height:4px; margin-left:1px; color:var(--text3);">+</div>`;
+                    if (dayTasks.length > 3) dotsHtml += `<div style="font-size:8px; line-height:4px; margin-left:1px; color:var(--text3);">+</div>`;
                 }
 
                 html += `
@@ -1182,8 +1193,8 @@
                 `;
             }
             document.getElementById('calGrid').innerHTML = html;
-            
-            if(selectedCalDate) {
+
+            if (selectedCalDate) {
                 renderCalTasks(visibleTasks);
             } else {
                 document.getElementById('calTasksTitle').style.display = 'none';
@@ -1198,17 +1209,17 @@
         function renderCalTasks(visibleTasks) {
             const titleEl = document.getElementById('calTasksTitle');
             const listEl = document.getElementById('calTaskList');
-            
+
             const [y, m, d] = selectedCalDate.split('-');
-            const dObj = new Date(y, parseInt(m)-1, d);
-            titleEl.textContent = `ระบุวันที่: ${dObj.toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'numeric'})}`;
+            const dObj = new Date(y, parseInt(m) - 1, d);
+            titleEl.textContent = `ระบุวันที่: ${dObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}`;
             titleEl.style.display = 'block';
 
             const filteredTasks = visibleTasks.filter(t => getTaskDateStr(t) === selectedCalDate);
-            
+
             const rank = { สูง: 0, กลาง: 1, ต่ำ: 2 };
             filteredTasks.sort((a, b) => {
-                if(a.done !== b.done) return (a.done ? 1 : 0) - (b.done ? 1 : 0);
+                if (a.done !== b.done) return (a.done ? 1 : 0) - (b.done ? 1 : 0);
                 return (rank[a.priority] || 1) - (rank[b.priority] || 1);
             });
 
@@ -1365,10 +1376,10 @@
             const inp = document.getElementById('taskInput');
             const title = inp.value.trim();
             if (!title) { inp.focus(); return; }
-            
+
             let dTime = document.getElementById('dueTimeInput').value;
             if (!dTime && currentView === 'calendar' && selectedCalDate) {
-                dTime = selectedCalDate + 'T00:00'; 
+                dTime = selectedCalDate + 'T00:00';
             }
 
             const task = {
@@ -1384,7 +1395,7 @@
                 created: new Date().toISOString()
             };
             tasks.unshift(task);
-            
+
             if (currentView === 'calendar') {
                 const newDateStr = getTaskDateStr(task);
                 if (newDateStr) selectedCalDate = newDateStr;
