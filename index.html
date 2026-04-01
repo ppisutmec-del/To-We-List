@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Our To-Do 💕</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent
+        }
+
+        :root {
+            --pink: #e8748a;
+            --pink-light: #fdf0f2;
+            --pink-mid: #f5b8c4;
+            --pink-dark: #c0415a;
+            --purple: #9b72cf;
+            --purple-light: #f5f0fb;
+            --purple-mid: #d4b8ef;
+            --gold: #e8b86d;
+            --text: #2d2d2d;
+            --text2: #7a7a7a;
+            --text3: #b0b0b0;
+            --bg: #fffbfd;
+            --surface: #ffffff;
+            --border: #f0e0e8;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Sans Thai', sans-serif
+        }
+
+        body {
+            overflow-x: hidden;
+            padding-bottom: 110px
+        }
+
+        /* ─── Layout ─── */
+        .app {
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 0 16px
+        }
+
+        /* ─── Loading ─── */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(160deg, #fff0f4 0%, #f5eeff 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            gap: 14px;
+            transition: opacity .4s
+        }
+
+        .loading-overlay.hide {
+            opacity: 0;
+            pointer-events: none
+        }
+
+        .loading-heart {
+            font-size: 56px;
+            animation: heartbeat .85s infinite
+        }
+
+        @keyframes heartbeat {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.18)
+            }
+        }
+
+        .loading-text {
+            font-size: 15px;
+            color: var(--pink);
+            letter-spacing: .5px
+        }
+
+        /* ─── Toast ─── */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-6px);
+            background: #2d2d2d;
+            color: #fff;
+            padding: 9px 20px;
+            border-radius: 24px;
+            font-size: 13px;
+            z-index: 300;
+            opacity: 0;
+            transition: all .3s;
+            pointer-events: none;
+            white-space: nowrap
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0)
+        }
+
+        /* ─── Header ─── */
+        .header {
+            padding: 22px 0 10px;
+            text-align: center
+        }
+
+        .header-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 500;
+            background: linear-gradient(135deg, var(--pink-dark) 0%, var(--purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .header-sub {
+            font-size: 11.5px;
+            color: var(--text3);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px
+        }
+
+        .sync-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4caf50;
+            flex-shrink: 0;
+            animation: blink 2.2s infinite
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .3
+            }
+        }
+
+        /* ─── Owner cards ─── */
+        .owners-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 12px 0 10px
+        }
+
+        .owner-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 18px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: all .2s;
+            text-align: center;
+            user-select: none
+        }
+
+        .owner-card.active-p1 {
+            border-color: var(--pink);
+            background: var(--pink-light);
+            box-shadow: 0 2px 12px rgba(232, 116, 138, .15)
+        }
+
+        .owner-card.active-p2 {
+            border-color: var(--purple);
+            background: var(--purple-light);
+            box-shadow: 0 2px 12px rgba(155, 114, 207, .15)
+        }
+
+        .owner-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin: 0 auto 6px;
+            overflow: hidden; /* For circular images */
+        }
+
+        .av1 {
+            background: #fce4ec
+        }
+
+        .av2 {
+            background: #ede7f6
+        }
+
+        .owner-name {
+            font-size: 14px;
+            font-weight: 500
+        }
+
+        .owner-count {
+            font-size: 11px;
+            color: var(--text3);
+            margin-top: 2px
+        }
+
+        /* ─── Add box ─── */
+        .add-box {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            padding: 14px 14px 12px;
+            margin: 6px 0 10px;
+            box-shadow: 0 2px 14px rgba(232, 116, 138, .06)
+        }
+
+        .add-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 10px
+        }
+
+        .add-input {
+            flex: 1;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            background: var(--bg);
+            transition: border-color .2s
+        }
+
+        .add-input:focus {
+            border-color: var(--pink)
+        }
+
+        .add-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform .15s, box-shadow .15s;
+            box-shadow: 0 3px 10px rgba(155, 114, 207, .3)
+        }
+
+        .add-btn:active {
+            transform: scale(.93)
+        }
+
+        .add-row2 {
+            display: flex;
+            gap: 7px
+        }
+
+        .sel {
+            flex: 1;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 7px 8px;
+            font-size: 12px;
+            font-family: inherit;
+            background: var(--bg);
+            outline: none;
+            color: var(--text);
+            transition: border-color .2s
+        }
+
+        .sel:focus {
+            border-color: var(--pink)
+        }
+
+        /* ─── Filters ─── */
+        .filters {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 2px 0 10px;
+            scrollbar-width: none
+        }
+
+        .filters::-webkit-scrollbar {
+            display: none
+        }
+
+        .filter-btn {
+            padding: 6px 15px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all .2s;
+            color: var(--text2);
+            flex-shrink: 0
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            border-color: transparent;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(155, 114, 207, .25)
+        }
+
+        /* ─── Sort row ─── */
+        .sort-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px
+        }
+
+        .sort-label {
+            font-size: 12px;
+            color: var(--text3)
+        }
+
+        .sort-sel {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-family: inherit;
+            background: var(--bg);
+            color: var(--text);
+            outline: none
+        }
+
+        /* ─── Task list ─── */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        /* ─── Task card ─── */
+        .task-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            transition: opacity .3s, box-shadow .2s
+        }
+
+        .task-card:not(.done):hover {
+            box-shadow: 0 3px 16px rgba(232, 116, 138, .1)
+        }
+
+        .task-card.done {
+            opacity: .6
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            cursor: pointer
+        }
+
+        .check-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--pink-mid);
+            flex-shrink: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s
+        }
+
+        .check-circle.checked {
+            background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+            border-color: var(--pink-dark)
+        }
+
+        .check-circle.checked::after {
+            content: '✓';
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600
+        }
+
+        .task-info {
+            flex: 1;
+            min-width: 0
+        }
+
+        .task-title {
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color .2s
+        }
+
+        .task-card.done .task-title {
+            text-decoration: line-through;
+            color: var(--text3)
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 5px;
+            margin-top: 4px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .cat-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-weight: 500
+        }
+
+        .pri-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 8px
+        }
+
+        .by-badge {
+            font-size: 10px;
+            color: var(--text3)
+        }
+
+        .time-badge {
+            font-size: 10.5px;
+            color: var(--text2);
+            font-weight: 500;
+        }
+
+        .cat-ทั่วไป {
+            background: #fff3e0;
+            color: #bf360c
+        }
+
+        .cat-งาน {
+            background: #e8f5e9;
+            color: #1b5e20
+        }
+
+        .cat-ส่วนตัว {
+            background: #fce4ec;
+            color: #880e4f
+        }
+
+        .cat-สุขภาพ {
+            background: #e1f5fe;
+            color: #01579b
+        }
+
+        .cat-การเงิน {
+            background: #f3e5f5;
+            color: #4a148c
+        }
+
+        .cat-พัฒนาทักษะ {
+            background: #fffde7;
+            color: #f57f17
+        }
+
+        .cat-คู่รัก {
+            background: #fdf0f2;
+            color: #c0415a
+        }
+
+        .pri-สูง {
+            background: #ffebee;
+            color: #c62828
+        }
+
+        .pri-กลาง {
+            background: #fff8e1;
+            color: #f9a825
+        }
+
+        .pri-ต่ำ {
+            background: #f1f8e9;
+            color: #558b2f
+        }
+
+        .expand-icon {
+            font-size: 16px;
+            color: var(--text3);
+            flex-shrink: 0;
+            transition: transform .25s
+        }
+
+        .task-card.expanded .expand-icon {
+            transform: rotate(180deg)
+        }
+
+        /* ─── Task body ─── */
+        .task-body {
+            padding: 0 14px 14px;
+            border-top: 1px solid var(--pink-light);
+            animation: slideDown .2s ease
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .note-label {
+            font-size: 11px;
+            color: var(--text3);
+            margin-top: 10px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .note-area {
+            width: 100%;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 11px;
+            font-size: 13px;
+            font-family: inherit;
+            resize: none;
+            background: var(--bg);
+            outline: none;
+            color: var(--text);
+            transition: border-color .2s;
+            line-height: 1.55
+        }
+
+        .note-area:focus {
+            border-color: var(--purple)
+        }
+
+        .sub-label {
+            font-size: 11px;
+            color: var(--text3);
+            margin-top: 10px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .subtask-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 4px
+        }
+
+        .subtask-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
+            color: var(--text2)
+        }
+
+        .sub-check {
+            width: 17px;
+            height: 17px;
+            border-radius: 5px;
+            border: 1.5px solid var(--pink-mid);
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s
+        }
+
+        .sub-check.checked {
+            background: var(--purple);
+            border-color: var(--purple)
+        }
+
+        .sub-check.checked::after {
+            content: '✓';
+            color: #fff;
+            font-size: 10px
+        }
+
+        .sub-done {
+            text-decoration: line-through;
+            color: var(--text3)
+        }
+
+        .subtask-row {
+            display: flex;
+            gap: 7px;
+            margin-top: 8px
+        }
+
+        .subtask-input {
+            flex: 1;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            padding: 7px 11px;
+            font-size: 13px;
+            font-family: inherit;
+            background: var(--bg);
+            outline: none;
+            color: var(--text);
+            transition: border-color .2s
+        }
+
+        .subtask-input:focus {
+            border-color: var(--purple)
+        }
+
+        .sub-add-btn {
+            padding: 7px 13px;
+            border-radius: 9px;
+            background: var(--purple-light);
+            border: 1.5px solid var(--purple-mid);
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            color: var(--purple);
+            font-weight: 500;
+            white-space: nowrap;
+            transition: background .15s
+        }
+
+        .sub-add-btn:active {
+            background: var(--purple-mid)
+        }
+
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px
+        }
+
+        .sheet-id {
+            font-size: 10px;
+            color: var(--text3)
+        }
+
+        .del-btn {
+            font-size: 11px;
+            color: #e0637a;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: inherit;
+            padding: 5px 9px;
+            border-radius: 7px;
+            transition: background .15s
+        }
+
+        .del-btn:active {
+            background: #fef0f2
+        }
+
+        /* ─── Empty state ─── */
+        .empty {
+            text-align: center;
+            padding: 44px 20px;
+            color: var(--text3)
+        }
+
+        .empty-icon {
+            font-size: 44px;
+            margin-bottom: 10px
+        }
+
+        .empty-text {
+            font-size: 14px
+        }
+
+        /* ─── Status bar ─── */
+        .status-bar {
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            background: rgba(255, 251, 253, .95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 6px 16px;
+            font-size: 12px;
+            color: var(--text2);
+            text-align: center;
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px
+        }
+
+        /* ─── Bottom Nav ─── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 60px;
+            background: rgba(255, 251, 253, .95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: var(--text3);
+            cursor: pointer;
+            transition: color .2s;
+        }
+
+        .nav-item.active {
+            color: var(--pink-dark);
+            font-weight: 500;
+        }
+
+        /* ─── Calendar ─── */
+        .calendar-view {
+            display: none;
+            padding-bottom: 20px;
+        }
+
+        .cal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .cal-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: var(--pink-dark);
+            cursor: pointer;
+            padding: 5px 15px;
+        }
+
+        .cal-month {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .cal-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text2);
+            margin-bottom: 8px;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .cal-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 5px;
+            border-radius: 12px;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .cal-cell.today {
+            background: var(--pink-light);
+            border-color: var(--pink-mid);
+        }
+
+        .cal-cell.selected {
+            border-color: var(--purple);
+            background: var(--purple-light);
+        }
+
+        .cal-cell.empty {
+            pointer-events: none;
+        }
+
+        .cal-date {
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .cal-dots {
+            display: flex;
+            gap: 2px;
+            margin-top: 3px;
+        }
+
+        .cal-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+
+        .cal-tasks-title {
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--pink-light);
+            padding-bottom: 5px;
+        }
+
+        .saving {
+            color: var(--pink);
+            animation: pulse-text .8s infinite
+        }
+
+        @keyframes pulse-text {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .5
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Loading -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-heart">💕</div>
+        <div class="loading-text">กำลังโหลดข้อมูล...</div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- App -->
+    <div class="app">
+
+        <div class="header">
+            <div class="header-title">Our To-Do ♡</div>
+            <div class="header-sub">
+                <div class="sync-dot"></div>
+                ข้อมูลซิงค์กับ Google Sheets
+            </div>
+        </div>
+
+        <!-- Owner toggle -->
+        <div class="owners-bar">
+            <div class="owner-card active-p1" id="ownerP1" onclick="switchOwner('G')">
+                <div class="owner-avatar av1">
+                    <img src="g.png" style="width:100%; height:100%; object-fit:cover;" alt="G" onerror="this.style.display='none'">
+                </div>
+                <div class="owner-name">G</div>
+                <div class="owner-count" id="count1">0 งาน</div>
+            </div>
+            <div class="owner-card" id="ownerP2" onclick="switchOwner('B')">
+                <div class="owner-avatar av2">
+                    <img src="b.png" style="width:100%; height:100%; object-fit:cover;" alt="B" onerror="this.style.display='none'">
+                </div>
+                <div class="owner-name">B</div>
+                <div class="owner-count" id="count2">0 งาน</div>
+            </div>
+        </div>
+
+        <!-- Add task -->
+        <div class="add-box">
+            <div class="add-row">
+                <input class="add-input" id="taskInput" type="text" placeholder="เพิ่มสิ่งที่ต้องทำ..."
+                    onkeydown="if(event.key==='Enter')addTask()" />
+                <button class="add-btn" onclick="addTask()">+</button>
+            </div>
+            <div class="add-row2">
+                <select class="sel" id="catSel">
+                    <option value="ทั่วไป">ทั่วไป</option>
+                    <option value="งาน">งาน</option>
+                    <option value="ส่วนตัว">ส่วนตัว</option>
+                    <option value="สุขภาพ">สุขภาพ</option>
+                    <option value="การเงิน">การเงิน</option>
+                    <option value="พัฒนาทักษะ">พัฒนาทักษะ</option>
+                    <option value="คู่รัก">คู่รัก 💕</option>
+                </select>
+                <select class="sel" id="priSel">
+                    <option value="กลาง">สำคัญ: กลาง</option>
+                    <option value="สูง">สำคัญ: สูง</option>
+                    <option value="ต่ำ">สำคัญ: ต่ำ</option>
+                </select>
+                <select class="sel" id="ownerSel">
+                    <option value="G">G</option>
+                    <option value="B">B</option>
+                    <option value="ด้วยกัน">ด้วยกัน 💕</option>
+                </select>
+            </div>
+            <div class="add-row2" style="margin-top: 8px;">
+                <span style="font-size:12px; color:var(--text3); align-self:center; margin-left:4px;">กำหนดเวลา:</span>
+                <input class="sel" id="dueTimeInput" type="datetime-local" style="flex:1" />
+            </div>
+        </div>
+
+        <!-- List View Container -->
+        <div id="listView">
+            <!-- Filters -->
+            <div class="filters" id="filters">
+                <button class="filter-btn active" onclick="setFilter('ทั้งหมด',this)">ทั้งหมด</button>
+                <button class="filter-btn" onclick="setFilter('ทั่วไป',this)">ทั่วไป</button>
+                <button class="filter-btn" onclick="setFilter('งาน',this)">งาน</button>
+                <button class="filter-btn" onclick="setFilter('ส่วนตัว',this)">ส่วนตัว</button>
+                <button class="filter-btn" onclick="setFilter('สุขภาพ',this)">สุขภาพ</button>
+                <button class="filter-btn" onclick="setFilter('การเงิน',this)">การเงิน</button>
+                <button class="filter-btn" onclick="setFilter('พัฒนาทักษะ',this)">พัฒนาทักษะ</button>
+                <button class="filter-btn" onclick="setFilter('คู่รัก',this)">คู่รัก 💕</button>
+            </div>
+
+            <!-- Sort -->
+            <div class="sort-row">
+                <span class="sort-label">เรียงโดย:</span>
+                <select class="sort-sel" id="sortSel" onchange="renderTasks()">
+                    <option value="newest">ล่าสุด</option>
+                    <option value="priority">ความสำคัญ</option>
+                    <option value="az">A–Z</option>
+                </select>
+            </div>
+
+            <!-- Task list -->
+            <div class="task-list" id="taskList"></div>
+        </div>
+
+        <!-- Calendar View Container -->
+        <div class="calendar-view" id="calendarView">
+            <div class="cal-header">
+                <button class="cal-btn" onclick="prevMonth()">❮</button>
+                <div class="cal-month" id="calMonthLabel">เดือน ปี</div>
+                <button class="cal-btn" onclick="nextMonth()">❯</button>
+            </div>
+            <div class="cal-weekdays">
+                <div>อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+            
+            <div class="cal-tasks-title" id="calTasksTitle" style="display:none;"></div>
+            <div class="task-list" id="calTaskList"></div>
+        </div>
+
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+        <span id="statusText">กำลังโหลด...</span>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('list', this)">
+            <div style="font-size:22px; margin-bottom: 2px;">📋</div>
+            <div>หน้าหลัก</div>
+        </div>
+        <div class="nav-item" onclick="switchView('calendar', this)">
+            <div style="font-size:22px; margin-bottom: 2px;">📅</div>
+            <div>ปฏิทิน</div>
+        </div>
+    </div>
+
+    <script>
+        // ══════════════════════════════════════════
+        //  CONFIG — วาง Apps Script URL ที่นี่
+        // ══════════════════════════════════════════
+        const APPS_SCRIPT_URL = '';   // <-- ใส่ URL ที่ได้จาก Apps Script Deploy
+        const SHEET_ID = '1ZDSYiG2-BgqGf09LAZWDisRPXxyFYNNonluQKsYphus';
+
+        // ══════════════════════════════════════════
+        //  State
+        // ══════════════════════════════════════════
+        let tasks = [];
+        let currentFilter = 'ทั้งหมด';
+        let currentOwnerFilter = 'G';
+        let expandedId = null;
+        let saveTimer = null;
+        
+        let currentView = 'list';
+        let calDate = new Date();
+        let selectedCalDate = null;
+
+        // ══════════════════════════════════════════
+        //  Utils
+        // ══════════════════════════════════════════
+        function genId() { return Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
+
+        function formatDueTime(dtStr) {
+            if (!dtStr) return '';
+            const d = new Date(dtStr);
+            if (isNaN(d.getTime())) return dtStr;
+            const today = new Date();
+            const isToday = d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+            const time = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            if (isToday) return `วันนี้ ${time} น.`;
+            return `${d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })} ${time} น.`;
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2400);
+        }
+
+        function setStatus(msg, saving = false) {
+            const el = document.getElementById('statusText');
+            el.textContent = msg;
+            el.className = saving ? 'saving' : '';
+        }
+
+        // ══════════════════════════════════════════
+        //  Owner filter
+        // ══════════════════════════════════════════
+        function switchOwner(who) {
+            currentOwnerFilter = who;
+            document.getElementById('ownerP1').className = 'owner-card' + (who === 'G' ? ' active-p1' : '');
+            document.getElementById('ownerP2').className = 'owner-card' + (who === 'B' ? ' active-p2' : '');
+            renderTasks();
+        }
+
+        // ══════════════════════════════════════════
+        //  Category filter
+        // ══════════════════════════════════════════
+        function setFilter(f, el) {
+            currentFilter = f;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderTasks();
+        }
+
+        // ══════════════════════════════════════════
+        //  Count badges
+        // ══════════════════════════════════════════
+        function updateCounts() {
+            document.getElementById('count1').textContent = tasks.filter(t => t.owner === 'G' || t.owner === 'ด้วยกัน').length + ' งาน';
+            document.getElementById('count2').textContent = tasks.filter(t => t.owner === 'B' || t.owner === 'ด้วยกัน').length + ' งาน';
+        }
+
+        // ══════════════════════════════════════════
+        //  Navigation & Calendar Logic
+        // ══════════════════════════════════════════
+        function switchView(view, btnNode) {
+            currentView = view;
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if(btnNode) btnNode.classList.add('active');
+            
+            if (view === 'list') {
+                document.getElementById('listView').style.display = 'block';
+                document.getElementById('calendarView').style.display = 'none';
+            } else {
+                document.getElementById('listView').style.display = 'none';
+                document.getElementById('calendarView').style.display = 'block';
+            }
+            renderTasks();
+        }
+
+        function getTaskDateStr(t) {
+            const dtStr = t.dueTime || t.created;
+            if(!dtStr) return null;
+            const d = new Date(dtStr);
+            if(isNaN(d.getTime())) return null;
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        function renderCalendar() {
+            const year = calDate.getFullYear();
+            const month = calDate.getMonth();
+            const today = new Date();
+            
+            const monthNames = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+            document.getElementById('calMonthLabel').textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const visibleTasks = tasks.filter(t => currentOwnerFilter === 'ทั้งหมด' || t.owner === currentOwnerFilter || t.owner === 'ด้วยกัน');
+            const dateMap = {};
+            visibleTasks.forEach(t => {
+                const dateStr = getTaskDateStr(t);
+                if(dateStr) {
+                    if(!dateMap[dateStr]) dateMap[dateStr] = [];
+                    dateMap[dateStr].push(t);
+                }
+            });
+
+            let html = '';
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="cal-cell empty"></div>`;
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                
+                let classes = 'cal-cell';
+                if(year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) classes += ' today';
+                if(dateStr === selectedCalDate) classes += ' selected';
+
+                let dotsHtml = '';
+                if(dateMap[dateStr] && dateMap[dateStr].length > 0) {
+                    const dayTasks = dateMap[dateStr];
+                    const numDots = Math.min(dayTasks.length, 3);
+                    for(let k=0; k<numDots; k++) {
+                        let color = '#7a7a7a';
+                        if(dayTasks[k].priority === 'สูง') color = '#c62828';
+                        else if(dayTasks[k].priority === 'กลาง') color = '#f9a825';
+                        else if(dayTasks[k].priority === 'ต่ำ') color = '#558b2f';
+                        dotsHtml += `<div class="cal-dot" style="background:${color}"></div>`;
+                    }
+                    if(dayTasks.length > 3) dotsHtml += `<div style="font-size:8px; line-height:4px; margin-left:1px; color:var(--text3);">+</div>`;
+                }
+
+                html += `
+                    <div class="${classes}" onclick="selectCalDate('${dateStr}')">
+                        <div class="cal-date">${i}</div>
+                        <div class="cal-dots">${dotsHtml}</div>
+                    </div>
+                `;
+            }
+            document.getElementById('calGrid').innerHTML = html;
+            
+            if(selectedCalDate) {
+                renderCalTasks(visibleTasks);
+            } else {
+                document.getElementById('calTasksTitle').style.display = 'none';
+                document.getElementById('calTaskList').innerHTML = '';
+            }
+        }
+
+        function prevMonth() { calDate.setMonth(calDate.getMonth() - 1); selectedCalDate = null; renderCalendar(); }
+        function nextMonth() { calDate.setMonth(calDate.getMonth() + 1); selectedCalDate = null; renderCalendar(); }
+        function selectCalDate(dateStr) { selectedCalDate = dateStr; renderCalendar(); }
+
+        function renderCalTasks(visibleTasks) {
+            const titleEl = document.getElementById('calTasksTitle');
+            const listEl = document.getElementById('calTaskList');
+            
+            const [y, m, d] = selectedCalDate.split('-');
+            const dObj = new Date(y, parseInt(m)-1, d);
+            titleEl.textContent = `ระบุวันที่: ${dObj.toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'numeric'})}`;
+            titleEl.style.display = 'block';
+
+            const filteredTasks = visibleTasks.filter(t => getTaskDateStr(t) === selectedCalDate);
+            
+            const rank = { สูง: 0, กลาง: 1, ต่ำ: 2 };
+            filteredTasks.sort((a, b) => {
+                if(a.done !== b.done) return (a.done ? 1 : 0) - (b.done ? 1 : 0);
+                return (rank[a.priority] || 1) - (rank[b.priority] || 1);
+            });
+
+            if (!filteredTasks.length) {
+                listEl.innerHTML = `<div class="empty" style="padding:20px;"><div class="empty-icon">🌱</div><div class="empty-text">ไม่มีงานสำหรับวันนี้</div></div>`;
+                return;
+            }
+            listEl.innerHTML = filteredTasks.map(t => cardHTML(t)).join('');
+        }
+
+        // ══════════════════════════════════════════
+        //  Render
+        // ══════════════════════════════════════════
+        function renderTasks() {
+            updateCounts();
+            if (currentView === 'list') {
+                renderListView();
+            } else {
+                renderCalendar();
+            }
+        }
+
+        function renderListView() {
+            const sort = document.getElementById('sortSel').value;
+            let list = tasks.filter(t => {
+                if (currentFilter !== 'ทั้งหมด' && t.category !== currentFilter) return false;
+                if (currentOwnerFilter !== 'ทั้งหมด' && t.owner !== currentOwnerFilter && t.owner !== 'ด้วยกัน') return false;
+                return true;
+            });
+            if (sort === 'priority') {
+                const rank = { สูง: 0, กลาง: 1, ต่ำ: 2 };
+                list.sort((a, b) => (rank[a.priority] || 1) - (rank[b.priority] || 1));
+            } else if (sort === 'az') {
+                list.sort((a, b) => a.title.localeCompare(b.title, 'th'));
+            }
+            // done tasks go last
+            list.sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0));
+
+            const el = document.getElementById('taskList');
+            if (!list.length) {
+                el.innerHTML = `<div class="empty"><div class="empty-icon">💕</div><div class="empty-text">ยังไม่มีงานในหมวดนี้</div></div>`;
+                return;
+            }
+            el.innerHTML = list.map(t => cardHTML(t)).join('');
+        }
+
+        function cardHTML(t) {
+            const exp = expandedId === t.id;
+            const subs = t.subtasks || [];
+            const subsDone = subs.filter(s => s.done).length;
+            const ownerLabel = t.owner === 'ด้วยกัน' ? '💕 ด้วยกัน' : t.owner === 'G' ? 'G' : 'B';
+
+            const subItems = subs.map((s, i) => `
+    <div class="subtask-item">
+      <div class="sub-check${s.done ? ' checked' : ''}" onclick="toggleSub('${t.id}',${i})"></div>
+      <span class="${s.done ? 'sub-done' : ''}">${escHtml(s.text)}</span>
+    </div>`).join('');
+
+            const timeLabel = t.dueTime ? `<span class="time-badge">⏰ ${formatDueTime(t.dueTime)}</span>` : '';
+
+            return `
+  <div class="task-card${t.done ? ' done' : ''}${exp ? ' expanded' : ''}" id="card_${t.id}">
+    <div class="task-header" onclick="toggleExpand('${t.id}')">
+      <div class="check-circle${t.done ? ' checked' : ''}" onclick="event.stopPropagation();toggleDone('${t.id}')"></div>
+      <div class="task-info">
+        <div class="task-title">${escHtml(t.title)}</div>
+        <div class="task-meta">
+          <span class="cat-badge cat-${t.category}">${t.category}</span>
+          <span class="pri-badge pri-${t.priority}">${t.priority}</span>
+          <span class="by-badge">${ownerLabel}${subs.length ? ` · ${subsDone}/${subs.length}` : ''}</span>
+          ${timeLabel}
+        </div>
+      </div>
+      <div class="expand-icon">▾</div>
+    </div>
+    ${exp ? `
+    <div class="task-body">
+      <div class="note-label">📝 บันทึก</div>
+      <textarea class="note-area" rows="2"
+        placeholder="จดบันทึกข้อมูลสำคัญที่นี่..."
+        onchange="updateNote('${t.id}',this.value)">${escHtml(t.note || '')}</textarea>
+      <div class="note-label">⏰ กำหนดเวลา</div>
+      <input type="datetime-local" class="note-area" style="padding: 7px 11px; height: auto;" 
+        value="${t.dueTime || ''}" onchange="updateDueTime('${t.id}', this.value)" />
+      <div class="sub-label">✅ เช็คลิสต์ย่อย</div>
+      <div class="subtask-list">${subItems}</div>
+      <div class="subtask-row">
+        <input class="subtask-input" id="sub_${t.id}" type="text"
+          placeholder="เพิ่มงานย่อย..."
+          onkeydown="if(event.key==='Enter')addSubtask('${t.id}')"/>
+        <button class="sub-add-btn" onclick="addSubtask('${t.id}')">เพิ่ม</button>
+      </div>
+      <div class="task-footer">
+        <span class="sheet-id">SHEET ID: ${SHEET_ID.slice(0, 8)}...</span>
+        <button class="del-btn" onclick="event.stopPropagation();deleteTask('${t.id}')">🗑 ลบงานนี้ทิ้ง</button>
+      </div>
+    </div>` : ''}
+  </div>`;
+        }
+
+        function escHtml(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // ══════════════════════════════════════════
+        //  Actions
+        // ══════════════════════════════════════════
+        function toggleExpand(id) {
+            expandedId = expandedId === id ? null : id;
+            renderTasks();
+        }
+
+        function toggleDone(id) {
+            const t = tasks.find(x => x.id === id);
+            if (t) { t.done = !t.done; renderTasks(); scheduleSave(); }
+        }
+
+        function toggleSub(taskId, idx) {
+            const t = tasks.find(x => x.id === taskId);
+            if (t && t.subtasks[idx]) {
+                t.subtasks[idx].done = !t.subtasks[idx].done;
+                renderTasks();
+                scheduleSave();
+            }
+        }
+
+        function updateNote(id, val) {
+            const t = tasks.find(x => x.id === id);
+            if (t) { t.note = val; scheduleSave(); }
+        }
+
+        function updateDueTime(id, val) {
+            const t = tasks.find(x => x.id === id);
+            if (t) { t.dueTime = val; renderTasks(); scheduleSave(); }
+        }
+
+        function addSubtask(taskId) {
+            const inp = document.getElementById('sub_' + taskId);
+            if (!inp || !inp.value.trim()) return;
+            const t = tasks.find(x => x.id === taskId);
+            if (t) {
+                if (!t.subtasks) t.subtasks = [];
+                t.subtasks.push({ text: inp.value.trim(), done: false });
+                renderTasks();
+                scheduleSave();
+                setTimeout(() => {
+                    const el = document.getElementById('sub_' + taskId);
+                    if (el) el.focus();
+                }, 60);
+            }
+        }
+
+        function addTask() {
+            const inp = document.getElementById('taskInput');
+            const title = inp.value.trim();
+            if (!title) { inp.focus(); return; }
+            
+            let dTime = document.getElementById('dueTimeInput').value;
+            if (!dTime && currentView === 'calendar' && selectedCalDate) {
+                dTime = selectedCalDate + 'T00:00'; 
+            }
+
+            const task = {
+                id: genId(),
+                title,
+                category: document.getElementById('catSel').value,
+                priority: document.getElementById('priSel').value,
+                owner: document.getElementById('ownerSel').value,
+                dueTime: dTime,
+                done: false,
+                note: '',
+                subtasks: [],
+                created: new Date().toISOString()
+            };
+            tasks.unshift(task);
+            
+            if (currentView === 'calendar') {
+                const newDateStr = getTaskDateStr(task);
+                if (newDateStr) selectedCalDate = newDateStr;
+            }
+
+            inp.value = '';
+            document.getElementById('dueTimeInput').value = '';
+            renderTasks();
+            scheduleSave();
+            showToast('เพิ่มงานแล้ว 💕');
+        }
+
+        function deleteTask(id) {
+            if (!confirm('ลบงานนี้?')) return;
+            tasks = tasks.filter(t => t.id !== id);
+            if (expandedId === id) expandedId = null;
+            renderTasks();
+            scheduleSave();
+            showToast('ลบงานแล้ว');
+        }
+
+        // ══════════════════════════════════════════
+        //  Sync — Google Sheets via Apps Script
+        // ══════════════════════════════════════════
+        function scheduleSave() {
+            setStatus('กำลังบันทึก...', true);
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(saveToSheet, 1800);
+        }
+
+        async function saveToSheet() {
+            // Always backup locally first
+            localStorage.setItem('couple_tasks', JSON.stringify(tasks));
+
+            if (!APPS_SCRIPT_URL) {
+                setStatus(`${tasks.length} รายการ`);
+                return;
+            }
+            setStatus('กำลังซิงค์กับ Sheets...', true);
+            try {
+                const resp = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action: 'save_all', tasks })
+                });
+                const data = await resp.json();
+                if (data.ok) {
+                    setStatus(`ซิงค์แล้ว ${tasks.length} รายการ ✓ · ${new Date().toLocaleTimeString('th-TH')}`);
+                } else {
+                    setStatus('บันทึกใน device แล้ว (Sheets error)');
+                }
+            } catch (e) {
+                setStatus('บันทึกใน device แล้ว (offline)');
+            }
+        }
+
+        async function loadFromSheet() {
+            // Try local first for instant display
+            const local = localStorage.getItem('couple_tasks');
+            if (local) {
+                try { tasks = JSON.parse(local); renderTasks(); } catch (e) { }
+            }
+
+            if (!APPS_SCRIPT_URL) {
+                if (!tasks.length) loadSampleTasks();
+                setStatus(`${tasks.length} รายการ`);
+                return;
+            }
+
+            setStatus('กำลังโหลดจาก Google Sheets...', true);
+            try {
+                const resp = await fetch(APPS_SCRIPT_URL + '?t=' + Date.now());
+                const data = await resp.json();
+                if (data.ok && data.tasks) {
+                    tasks = data.tasks;
+                    localStorage.setItem('couple_tasks', JSON.stringify(tasks));
+                    renderTasks();
+                    setStatus(`โหลดแล้ว ${tasks.length} รายการ จาก Google Sheets ✓`);
+                } else {
+                    setStatus(`${tasks.length} รายการ (จาก device)`);
+                }
+            } catch (e) {
+                setStatus(`${tasks.length} รายการ (offline mode)`);
+            }
+        }
+
+        function loadSampleTasks() {
+            tasks = [
+                { id: genId(), title: 'วางแผนเที่ยวรอบหน้า', category: 'คู่รัก', priority: 'สูง', owner: 'ด้วยกัน', done: false, note: 'อยากไปทะเล 🌊', subtasks: [{ text: 'เลือกจังหวัด', done: false }, { text: 'จองที่พัก', done: false }, { text: 'จองตั๋ว', done: false }], created: new Date().toISOString() },
+                { id: genId(), title: 'ออกกำลังกายเช้า', category: 'สุขภาพ', priority: 'กลาง', owner: 'G', done: false, note: '', subtasks: [], created: new Date().toISOString() },
+                { id: genId(), title: 'จ่ายค่าไฟ', category: 'การเงิน', priority: 'สูง', owner: 'B', done: false, note: '', subtasks: [], created: new Date().toISOString() },
+                { id: genId(), title: 'ทำ time-stamp-team', category: 'งาน', priority: 'ต่ำ', owner: 'B', done: true, note: '', subtasks: [], created: new Date().toISOString() },
+            ];
+            renderTasks();
+        }
+
+        // ══════════════════════════════════════════
+        //  Boot
+        // ══════════════════════════════════════════
+        window.addEventListener('load', async () => {
+            await loadFromSheet();
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.add('hide');
+            setTimeout(() => overlay.style.display = 'none', 450);
+        });
+    </script>
+</body>
+
+</html>
