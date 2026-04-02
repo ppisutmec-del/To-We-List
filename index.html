@@ -919,7 +919,7 @@
                     <img src="g.png" style="width:100%; height:100%; object-fit:cover;" alt="G"
                         onerror="this.style.display='none'">
                 </div>
-                <div class="owner-name">G</div>
+                <div class="owner-name">G💕</div>
                 <div class="owner-count" id="count1">0 งาน</div>
             </div>
             <div class="owner-card" id="ownerP2" onclick="switchOwner('B')">
@@ -927,7 +927,7 @@
                     <img src="b.png" style="width:100%; height:100%; object-fit:cover;" alt="B"
                         onerror="this.style.display='none'">
                 </div>
-                <div class="owner-name">B</div>
+                <div class="owner-name">B💕</div>
                 <div class="owner-count" id="count2">0 งาน</div>
             </div>
         </div>
@@ -955,8 +955,8 @@
                     <option value="ต่ำ">สำคัญ: ต่ำ</option>
                 </select>
                 <select class="sel" id="ownerSel">
-                    <option value="G">G</option>
-                    <option value="B">B</option>
+                    <option value="G">G💕</option>
+                    <option value="B">B💕</option>
                     <option value="ด้วยกัน">ด้วยกัน 💕</option>
                 </select>
             </div>
@@ -1270,7 +1270,7 @@
             const exp = expandedId === t.id;
             const subs = t.subtasks || [];
             const subsDone = subs.filter(s => s.done).length;
-            const ownerLabel = t.owner === 'ด้วยกัน' ? '💕 ด้วยกัน' : t.owner === 'G' ? 'G' : 'B';
+            const ownerLabel = t.owner === 'ด้วยกัน' ? '💕 ด้วยกัน' : t.owner === 'G' ? 'G💕' : 'B💕';
 
             const subItems = subs.map((s, i) => `
     <div class="subtask-item">
